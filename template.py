@@ -4,4 +4,4 @@ if len(sys.argv) > 1:
 else:
     fname = 'test.txt'
 with open(fname,'r') as fi:
-    lines = fi.readlines()
+    lines = list(map(str.strip,fi.readlines()))
