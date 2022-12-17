@@ -33,69 +33,53 @@ class Monkey:
             else:
                 self.items = self.items[1:]
             # monkey inspects
-            print('item',item)
-            new_worry = self.operation(item)
-            print('newworry',m.num,new_worry)
+            new_worry = self.do_op(item)
             # gets bored, divides by 3
             new_worry = new_worry // 3
             #print(' div3',m.num,new_worry)
-            if self.test(new_worry):
+            if (new_worry % self.test) == 0:
                 self.true_monkey.items.append(new_worry)
             else:
                 self.false_monkey.items.append(new_worry)
             self.inspected_items += 1
+
+    def do_op(self,itm):
+        return eval(self.operation.replace('x',str(itm)))
+
 
     def __str__(self):
         return 'Monkey ' + str(self.num) + ' ' + str(self.items)
 
 
 monkeys = {}
-m = None
+# find number of monkeys
 for line in lines:
-    line = line.strip()
     if line.startswith('Monkey'):
-        if m:
-            monkeys[m.num] = m
-        col = line.split(':')[0]
-        num = int(col.split(' ')[1])
-        m = Monkey(num)
-    elif line.startswith('Starting items:'):
-        itms = line.split(':')[1].strip()
-        m.items = eval('[' + itms + ']')
+        n = int(line[line.index(' ')+1:line.index(':')])
+        monkeys[n] = Monkey(n)
+
+# parse monkey input
+num = 0
+for i in range(1,len(lines)):
+    line = lines[i]
+    if line.startswith('Monkey'):
+        num += 1
+    elif line.startswith('Starting'):
+        itms = line[line.index(':')+2:]
+        monkeys[num].items = []
+        for x in itms.split(','):
+            monkeys[num].items.append(int(x.strip()))
     elif line.startswith('Operation'):
-        op = line[line.index('new =')+len('new = '):]
-        operator = op.split(' ')[1]
-        second = op.split(' ')[2]
-        if operator == '+':
-            if second == 'old':
-                m.operation = lambda x: x + x
-            else:
-                m.operation = lambda x: x + int(second)
-        else:
-            if second == 'old':
-                m.operation = lambda x: x * x
-            else:
-                m.operation = lambda x: x * int(second)
+        op = line[line.index('=')+2:]
+        monkeys[num].operation = op.replace('old','x')
     elif line.startswith('Test'):
-        mod = int(line[line.index('by ')+len('by '):])
-        m.test = lambda x: (x % mod) == 0
-    elif line.startswith('If true'):
-        monk = int(line[line.index('monkey')+len('monkey '):])
-        m.true_monkey = monk
-    elif line.startswith('If false'):
-        monk = int(line[line.index('monkey')+len('monkey '):])
-        m.false_monkey = monk
+        monkeys[num].test = int(line[line.index('by')+len('by '):])
+    elif line.startswith('If true:'):
+        monkeys[num].true_monkey = monkeys[int(line[-1])]
+    elif line.startswith('If false:'):
+        monkeys[num].false_monkey = monkeys[int(line[-1])]
 
-# commit last one
-monkeys[m.num] = m
-# doctor up the true/false monkey piece (change type to actual monkey)
-for _, m in monkeys.items():
-    m.true_monkey = monkeys[m.true_monkey]
-    m.false_monkey = monkeys[m.false_monkey]
-
-
-#for i in range(20):
-for i in range(1):
+for i in range(20):
     # iterate through monkeys for round i
     for _,m in monkeys.items():
         m.round()
