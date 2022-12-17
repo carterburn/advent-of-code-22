@@ -21,11 +21,24 @@ class Monkey:
 
     def round(self):
         # inspect each item 
-        for item in self.items:
+        while True:
+            # peek
+            if len(self.items) == 0:
+                break
+            # grab
+            item = self.items[0]
+            # reset
+            if len(self.items) == 0:
+                self.items = []
+            else:
+                self.items = self.items[1:]
             # monkey inspects
+            print('item',item)
             new_worry = self.operation(item)
+            print('newworry',m.num,new_worry)
             # gets bored, divides by 3
             new_worry = new_worry // 3
+            #print(' div3',m.num,new_worry)
             if self.test(new_worry):
                 self.true_monkey.items.append(new_worry)
             else:
@@ -50,8 +63,19 @@ for line in lines:
         itms = line.split(':')[1].strip()
         m.items = eval('[' + itms + ']')
     elif line.startswith('Operation'):
-        op = line[line.index('old ')+len('old '):]
-        m.operation = lambda x: eval('x ' + op)
+        op = line[line.index('new =')+len('new = '):]
+        operator = op.split(' ')[1]
+        second = op.split(' ')[2]
+        if operator == '+':
+            if second == 'old':
+                m.operation = lambda x: x + x
+            else:
+                m.operation = lambda x: x + int(second)
+        else:
+            if second == 'old':
+                m.operation = lambda x: x * x
+            else:
+                m.operation = lambda x: x * int(second)
     elif line.startswith('Test'):
         mod = int(line[line.index('by ')+len('by '):])
         m.test = lambda x: (x % mod) == 0
@@ -70,7 +94,8 @@ for _, m in monkeys.items():
     m.false_monkey = monkeys[m.false_monkey]
 
 
-for i in range(20):
+#for i in range(20):
+for i in range(1):
     # iterate through monkeys for round i
     for _,m in monkeys.items():
         m.round()
@@ -80,6 +105,6 @@ for i in range(20):
         print('monkey',m.num,':',m.items)
 
 # find two most active monkeys
-active = [x.inspected_items for x in monkeys.keys()]
+active = [x.inspected_items for _,x in monkeys.items()]
 active.sort()
 print('answer:',active[-1] * active[-2])
