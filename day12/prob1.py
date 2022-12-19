@@ -69,8 +69,6 @@ def min_dist(Q, dist):
         if dist[v] == None:
             continue
         if dist[v] < min_dist:
-            if len(Q) == 31:
-                print('here')
             min_dist = dist[v]
             min_vert = v
     return min_vert
