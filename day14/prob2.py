@@ -33,6 +33,17 @@ for line in lines:
             for x in count_ind(start[0], stop[0]):
                 grid[(x,y)] = '#'
 
+# add floor which has y index of maxy+2
+minx = min(grid.keys(), key=lambda x: x[0])[0]
+maxx = max(grid.keys(), key=lambda x: x[0])[0]
+maxy = max(grid.keys(), key=lambda x: x[1])[1]
+floory = maxy+2
+floorxstart = minx-1
+floorxstop = maxx+1
+for x in count_ind(floorxstart, floorxstop):
+    grid[(x,floory)] = '#'
+
+
 def print_grid(grid):
     minx = min(grid.keys(), key=lambda x: x[0])[0]
     maxx = max(grid.keys(), key=lambda x: x[0])[0]
@@ -40,6 +51,10 @@ def print_grid(grid):
 
     # 0 to max y
     for y in range(maxy+1):
+        if y < 10:
+            sys.stdout.write(' ' + str(y) + '  ')
+        else:
+            sys.stdout.write(str(y) + '  ')
         for x in range(minx, maxx+1):
             if (x,y) in grid.keys():
                 if grid[(x,y)] == '#':
@@ -56,11 +71,14 @@ def drop_sand(maxy):
     # start point it (500,1) (falling from (500,0) first point to decide is
     # 500,1
     global grid
-    px,py = 500,1
+    px,py = 500,0
     while True:
-        if py > maxy:
-            return False
         # check if sand can move down one step
+        if py+1 == maxy+2:
+            # retroactively add a floor piece for logic (floor is infinite)
+            grid[(px,py+1)] = '#'
+            grid[(px-1,py+1)] = '#'
+            grid[(px+1,py+1)] = '#'
         if (px,py+1) not in grid.keys():
             # clear, continue moving down
             py += 1
@@ -80,17 +98,20 @@ def drop_sand(maxy):
                 else:
                     # can't move anywhere, come to rest
                     grid[(px,py)] = 'o'
+                    # check if we've come to rest at 500,1 (can't go down)
+                    if px == 500 and py == 0:
+                        return False
                     return True
             
 
 # start the sand falling
 at_rest = 0
-maxy = max(grid.keys(), key=lambda x: x[1])[1]
+print_grid(grid)
+maxy = (max(grid.keys(), key=lambda x: x[1])[1])-2
 while drop_sand(maxy):
     at_rest += 1
-
 print_grid(grid)
-print('answer:',at_rest)
+print('answer:',at_rest+1) # +1 because loop terminates before last sand drop
 
 
 """for path in paths:
