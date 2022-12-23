@@ -26,18 +26,29 @@ class Intervals():
             start = min(start, self.inter[i][0])
             stop = max(stop, self.inter[j-1][1])
         self.inter[i:j] = [(start,stop)]
-    
+
+    def itergaps(self, start, stop):
+        x = start
+        for interval in self.inter:
+            yield from range(x, interval[0])
+            x = interval[1]
+        yield from range(x, stop)
+
 INTS = re.compile(r"-?\d+")
 
-def part1(lines,y=2000000):
-    intervals, beacons = Intervals(), set()
-    for line in lines:
-        sx,sy,bx,by = (int(match.group(0)) for match in INTS.finditer(line))
-        diff = abs(sx-bx) + abs(sy-by) - abs(sy-y)
-        if diff >= 0:
-            intervals.add(sx-diff, sx+diff+1)
-        if y == by:
-            beacons.add(bx)
-    return len(intervals) - len(beacons)
+def part2(lines,size=4000000):
+    # make interval for each row in the size
+    inp = [[int(match.group(0)) for match in INTS.finditer(line)] for line in lines]
+    for y in range(size+1):
+        intervals = Intervals()
+        for sx,sy,bx,by in inp:
+            diff = abs(sx-bx) + abs(sy-by) - abs(sy-y)
+            start = max(0, sx-diff)
+            stop = min(size, sx+diff) + 1
+            if start < stop:
+                intervals.add(start,stop)
+        for x in intervals.itergaps(0, size+1):
+            return 4000000 * x + y
+    return None
 
-print('answer',part1(lines))
+print('answer:',part2(lines))
